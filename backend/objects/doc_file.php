@@ -1,23 +1,16 @@
 <?php
-class Docz
+class Doc_file
 {
     private $conn;
-    private $table_name = "docz";
+    private $table_name = "doc_file";
 
     public $id;
-    public $r_number;
-    public $r_date;
-    public $doc_speed;
-    public $doc_form_number;
-    public $doc_date;
+    public $docz_id;
     public $doc_form;
-    public $doc_to;
     public $name;
     public $file;
-    public $user_create;
-    public $st;
-    public $start;
-    public $end;
+    public $ext;
+    public $user_id_create;
     public $created;
 
     public function __construct($db)
@@ -53,7 +46,7 @@ class Docz
         // กำหนดเงื่อนไขการค้นหา
         $searchQuery = "";
         if ($search) {
-            $searchQuery = "WHERE name LIKE :search OR r_number LIKE :search OR doc_form_number LIKE :search OR r_date LIKE :search";
+            $searchQuery = "WHERE name LIKE :search ";
         }
 
         // ดึงข้อมูลตามหน้าและการค้นหา
@@ -81,10 +74,18 @@ class Docz
 
     public function read()
     {
-        $query = "SELECT * FROM " . $this->table_name . "ORDER BY created DESC";
+        $query = "SELECT * FROM $this->table_name ORDER BY created DESC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
+    }
+    public function readDoczId($docz_id)
+    {
+        $query = "SELECT * FROM $this->table_name WHERE docz_id = :docz_id ORDER BY created DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":docz_id", $docz_id);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
 
@@ -97,17 +98,13 @@ class Docz
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($row) {
-            $this->r_number = $row['r_number'];
-            $this->r_date = $row['r_date'];
-            $this->doc_speed = $row['doc_speed'];
-            $this->doc_form_number = $row['doc_form_number'];
-            $this->doc_date = $row['doc_date'];
+            $this->id = $row['id'];
+            $this->docz_id = $row['docz_id'];
             $this->doc_form = $row['doc_form'];
-            $this->doc_to = $row['doc_to'];
             $this->name = $row['name'];
             $this->file = $row['file'];
-            $this->user_create = $row['user_create'];
-            $this->st = $row['st'];
+            $this->ext = $row['ext'];
+            $this->user_id_create = $row['user_id_create'];
             $this->created = $row['created'];
         }
     }
@@ -116,39 +113,26 @@ class Docz
     {
         $query = "INSERT INTO " . $this->table_name . "
           SET
-            r_number=:r_number, r_date=:r_date, doc_speed=:doc_speed, doc_form_number=:doc_form_number,
-            doc_date=:doc_date, doc_form=:doc_form, doc_to=:doc_to,
-            name=:name, file=:file,
-            user_create=:user_create, st=:st";
-
+            docz_id=:docz_id, doc_form=:doc_form, name=:name, file=:file,
+            ext=:ext, user_id_create=:user_id_create";
 
         $stmt = $this->conn->prepare($query);
 
         // Clean data
-        $this->r_number = htmlspecialchars(strip_tags($this->r_number));
-        $this->r_date = htmlspecialchars(strip_tags($this->r_date));
-        $this->doc_speed = htmlspecialchars(strip_tags($this->doc_speed));
-        $this->doc_form_number = htmlspecialchars(strip_tags($this->doc_form_number));
-        $this->doc_date = htmlspecialchars(strip_tags($this->doc_date));
+        $this->docz_id = htmlspecialchars(strip_tags($this->docz_id));
         $this->doc_form = htmlspecialchars(strip_tags($this->doc_form));
-        $this->doc_to = htmlspecialchars(strip_tags($this->doc_to));
         $this->name = htmlspecialchars(strip_tags($this->name));
         $this->file = htmlspecialchars(strip_tags($this->file));
-        $this->user_create = htmlspecialchars(strip_tags($this->user_create));
-        $this->st = htmlspecialchars(strip_tags($this->st));
+        $this->ext = htmlspecialchars(strip_tags($this->ext));
+        $this->user_id_create = htmlspecialchars(strip_tags($this->user_id_create));
 
         // Bind values
-        $stmt->bindParam(":r_number", $this->r_number);
-        $stmt->bindParam(":r_date", $this->r_date);
-        $stmt->bindParam(":doc_speed", $this->doc_speed);
-        $stmt->bindParam(":doc_form_number", $this->doc_form_number);
-        $stmt->bindParam(":doc_date", $this->doc_date);
+        $stmt->bindParam(":docz_id", $this->docz_id);
         $stmt->bindParam(":doc_form", $this->doc_form);
-        $stmt->bindParam(":doc_to", $this->doc_to);
         $stmt->bindParam(":name", $this->name);
         $stmt->bindParam(":file", $this->file);
-        $stmt->bindParam(":user_create", $this->user_create);
-        $stmt->bindParam(":st", $this->st);
+        $stmt->bindParam(":ext", $this->ext);
+        $stmt->bindParam(":user_id_create", $this->user_id_create);
 
         // Execute query
         if ($stmt->execute()) {
@@ -164,39 +148,27 @@ class Docz
     {
         $query = "UPDATE " . $this->table_name . "
                   SET
-                    r_number=:r_number, r_date=:r_date, doc_speed=:doc_speed, doc_form_number=:doc_form_number,
-                    doc_date=:doc_date, doc_form=:doc_form, doc_to=:doc_to,
-                    name=:name, file=:file,
-                    user_create=:user_create, st=:st, created=CURRENT_TIMESTAMP
+                    docz_id=:docz_id, doc_form=:doc_form, name=:name, file=:file,
+                    ext=:ext, user_id_create=:user_id_create, created=CURRENT_TIMESTAMP
                   WHERE
                     id = :id";
 
         $stmt = $this->conn->prepare($query);
 
-        $this->r_number = htmlspecialchars(strip_tags($this->r_number));
-        $this->r_date = htmlspecialchars(strip_tags($this->r_date));
-        $this->doc_speed = htmlspecialchars(strip_tags($this->doc_speed));
-        $this->doc_form_number = htmlspecialchars(strip_tags($this->doc_form_number));
-        $this->doc_date = htmlspecialchars(strip_tags($this->doc_date));
+        $this->docz_id = htmlspecialchars(strip_tags($this->docz_id));
         $this->doc_form = htmlspecialchars(strip_tags($this->doc_form));
-        $this->doc_to = htmlspecialchars(strip_tags($this->doc_to));
         $this->name = htmlspecialchars(strip_tags($this->name));
         $this->file = htmlspecialchars(strip_tags($this->file));
-        $this->user_create = htmlspecialchars(strip_tags($this->user_create));
-        $this->st = htmlspecialchars(strip_tags($this->st));
+        $this->ext = htmlspecialchars(strip_tags($this->ext));
+        $this->user_id_create = htmlspecialchars(strip_tags($this->user_id_create));
         $this->id = htmlspecialchars(strip_tags($this->id));
 
-        $stmt->bindParam(":r_number", $this->r_number);
-        $stmt->bindParam(":r_date", $this->r_date);
-        $stmt->bindParam(":doc_speed", $this->doc_speed);
-        $stmt->bindParam(":doc_form_number", $this->doc_form_number);
-        $stmt->bindParam(":doc_date", $this->doc_date);
+        $stmt->bindParam(":docz_id", $this->docz_id);
         $stmt->bindParam(":doc_form", $this->doc_form);
-        $stmt->bindParam(":doc_to", $this->doc_to);
         $stmt->bindParam(":name", $this->name);
         $stmt->bindParam(":file", $this->file);
-        $stmt->bindParam(":user_create", $this->user_create);
-        $stmt->bindParam(":st", $this->st);
+        $stmt->bindParam(":ext", $this->ext);
+        $stmt->bindParam(":user_id_create", $this->user_id_create);
         $stmt->bindParam(":id", $this->id);
 
         if ($stmt->execute()) {
@@ -225,4 +197,3 @@ class Docz
         return false;
     }
 }
-?>

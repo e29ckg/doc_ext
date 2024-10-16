@@ -33,27 +33,30 @@
           <thead>
             <tr>
               <th></th>
+              <th>r_number</th>
+              <th>r_date</th>
+              <th>doc_form_number</th>
               <th>Name</th>
-              <th>Job</th>
-              <th>company</th>
-              <th>location</th>
-              <th>Last Login</th>
-              <th>Favorite Color</th>
+              <th>หนังสือนำ</th>
+              <th>เอกสารแนบ</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(item, index) in records" :key="item.id">
               <th>
                 {{ pagination.per_page * (current_page - 1) + (index + 1) }}
-                -
-                {{ item.id }}
+
+                <!-- {{ item.id }} -->
               </th>
+              <td>{{ item.r_number }}</td>
+              <td>{{ item.r_date }}</td>
+              <td>{{ item.doc_form_number }}</td>
               <td>{{ item.name }}</td>
-              <td>Quality Control Specialist</td>
-              <td>Littel, Schaden and Vandervort</td>
-              <td>Canada</td>
-              <td>12/16/2020</td>
-              <td>Blue</td>
+              <td>
+                {{ item.file }}
+                <PdfFile :file_url="item.file" />
+              </td>
+              <td>{{ item.file_ext }}</td>
             </tr>
           </tbody>
         </table>
@@ -89,6 +92,7 @@
 <script setup>
 import axios from "axios";
 import { ref, onMounted, watch } from "vue";
+import PdfFile from "@/components/dashboard/PdfFile.vue";
 
 const search = ref("");
 const records = ref([]);

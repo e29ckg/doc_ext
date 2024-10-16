@@ -9,11 +9,13 @@ date_default_timezone_set("Asia/Bangkok");
 
 include_once './config/database.php';
 include_once './objects/docz.php';
+include_once './objects/doc_file.php';
 
 $database = new Database();
 $db = $database->getConnection();
 
 $docz = new Docz($db);
+$doc_file = new Doc_file($db);
 
 $request_method = $_SERVER["REQUEST_METHOD"];
 switch ($request_method) {
@@ -21,7 +23,7 @@ switch ($request_method) {
 
         // Pagination parameters
         $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
-        $per_page = isset($_GET['per_page']) ? intval($_GET['per_page']) : 25;
+        $per_page = isset($_GET['per_page']) ? intval($_GET['per_page']) : 10;
         $search = isset($_GET['search_text']) ? $_GET['search_text'] : '';
 
 
@@ -49,7 +51,8 @@ switch ($request_method) {
                     "doc_date" => $doc_date,
                     "doc_form" => $doc_form,
                     "doc_to" => $doc_to,
-                    "created" => $created
+                    "created" => $created,
+                    "file_ext" => $doc_file->readDoczId($id)
                 );
 
                 array_push($doczs_arr["records"], $docz_item);
